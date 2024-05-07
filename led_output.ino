@@ -1,65 +1,82 @@
-int ledPin = 13;                    // choose the pin for the LED
-int vibPin = 7;
-int pirPin = 2;                     // choose the input pin (for PIR sensor)
-int vibVal = 0;
-int pirState = LOW;                 // we start, assuming no motion detected
-int pirVal = 0;                     // variable for reading the pin status
-unsigned long lastOutputTime = 0;   // to track the time of the last output
-unsigned long outputDelay = 1000;   // delay between outputs in milliseconds
+// Pin Definitions
+const int ledPin = 13;
+const int vibPin = 7;
+const int pirPin = 2;
 
-unsigned long lastActivityTime = 0; // to track the time of the last activity
-int activityCount = 0;              // count of activity within the last 10 minutes
-unsigned long activityWindow = 10 * 60 * 1000; // 10 minutes in milliseconds
-unsigned long ledOnTime = 5000;     // LED on time in milliseconds
+// Variable Declarations
+int vibVal = 0;
+int pirState = LOW;
+int pirVal = 0;
+unsigned long lastOutputTime = 0;
+unsigned long lastActivityTime = 0;
+int activityCount = 0;
+
+// Time Constants
+const unsigned long activityWindow = 10 * 60 * 1000;
+const unsigned long outputCooldown = 60 * 60 * 1000;
+bool outputOnCooldown = false;
 
 void setup() {
-  pinMode(ledPin, OUTPUT);          // declare LED as output
-  pinMode(pirPin, INPUT);           // declare sensor as input
+  // Initialize pin modes
+  pinMode(ledPin, OUTPUT);
+  pinMode(pirPin, INPUT);
   pinMode(vibPin, INPUT);
-
+  
+  // Initialize serial communication
   Serial.begin(9600);
 }
 
 void loop() {
-  unsigned long currentTime = millis();  // current time
-  pirVal = digitalRead(pirPin);          // read input value
+  // Get current time
+  unsigned long currentTime = millis();
+  
+  // Read sensor values
+  pirVal = digitalRead(pirPin);
   vibVal = digitalRead(vibPin);
 
-  // Check if both PIR sensor and vibration are activated
-  if (pirVal == HIGH && vibVal == 1) {   
-    if (currentTime - lastOutputTime >= outputDelay) {
+  // Check if motion and vibration detected
+  if (pirVal == HIGH && vibVal == HIGH) {   
+    if (!outputOnCooldown && currentTime - lastOutputTime >= 1000) {
       Serial.println("Vibration detected!");
       if (pirState == LOW) {
-        // we have just turned on
         Serial.println("Motion detected!");
         pirState = HIGH;
-        // Update activity count and time
+        
+        // Update activity count
         unsigned long timeDiff = currentTime - lastActivityTime;
         if (timeDiff > activityWindow) {
-          // If the last activity was outside the window, reset count
           activityCount = 1;
         } else {
           activityCount++;
         }
         lastActivityTime = currentTime;
-        // Check if activity count reaches 3 within the window
+        
+        // Activate LED output if activity count threshold reached
         if (activityCount >= 3) {
-          digitalWrite(ledPin, HIGH);    // Turn on the LED
-          delay(ledOnTime);              // Keep the LED on for a certain duration
-          digitalWrite(ledPin, LOW);     // Turn off the LED
-          activityCount = 0;             // Reset activity count
+          digitalWrite(ledPin, HIGH);
+          delay(5000);
+          digitalWrite(ledPin, LOW);
+          activityCount = 0;
+          lastOutputTime = currentTime;
+          outputOnCooldown = true;
+          Serial.println("LED output activated.");
         }
         Serial.print("Activity count within last 10 minutes: ");
         Serial.println(activityCount);
       }
-      lastOutputTime = currentTime;  // update last output time
     }
   } else {
+    // Check if motion ended
     if (pirState == HIGH){
-      // we have just turned off
       Serial.println("Motion ended!");
       pirState = LOW;
-      lastOutputTime = currentTime;  // update last output time
+      lastOutputTime = currentTime;
     }
+  }
+
+  // Check if cooldown period ended
+  if (outputOnCooldown && currentTime - lastOutputTime >= outputCooldown) {
+    outputOnCooldown = false;
+    Serial.println("LED output cooldown ended.");
   }
 }
