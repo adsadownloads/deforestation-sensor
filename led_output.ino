@@ -14,7 +14,8 @@ int vibActivityCount = 0;
 int dualActivityCount = 0;
 
 // Time Constants
-const unsigned long activityWindow = 600000;
+const unsigned long dualActivityWindow = 600000;
+const unsigned long vibActivityWindow = 180000;
 const unsigned long outputCooldown = 10000;
 bool outputOnCooldown = false;
 
@@ -51,10 +52,10 @@ void loop() {
   unsigned long currentTime = millis();
 
   // Check idleness
-  if (currentTime - lastDualActivityTime > activityWindow) {
+  if (currentTime - lastDualActivityTime > dualActivityWindow) {
     dualActivityCount = 0;
   }
-  if (currentTime - lastVibActivityTime > activityWindow) {
+  if (currentTime - lastVibActivityTime > vibActivityWindow) {
     vibActivityCount = 0;
   }
 
