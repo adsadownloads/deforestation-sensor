@@ -39,7 +39,7 @@ void output() {
   vibActivityCount = 0;
   lastOutputTime = currentTime;
   outputOnCooldown = true;
-} // Add this closing curly brace to properly close the output() function
+}
 
 void loop() {
   // Read sensor values
