@@ -73,7 +73,7 @@ void loop() {
       if (vibActivityCount >= 7) {
         output();
       }
-    } // Add this closing curly brace to properly close the if (!outputCooldown && currentTime - lastVibActivityTime < activityWindow) block
+    }
 
     // Check if motion (and vibration) activity detected
     if (pirVal == 1) {
