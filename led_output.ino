@@ -43,6 +43,9 @@ void output() {
 }
 
 void loop() {
+  delay(300); // Delay to limit false positives due to narrow detection
+              // loop timeframe
+  
   // Read sensor values
   pirVal = digitalRead(pirPin);
   delay(700); // Delay to account for swing motion during logging
@@ -94,7 +97,6 @@ void loop() {
       }
     }
   }
-  delay(300); // Delay to limit false positives due to narrow detection timeframe
 
   // Check if cooldown period ended
   if (outputOnCooldown && currentTime - lastOutputTime >= outputCooldown) {
