@@ -6,17 +6,17 @@ int LED = 12;
 /* Sensor state and counter variables */
 int pirState = 0;
 int vibState = 0;
-int bothActivityCount = 0;
-int vibActivityCount = 0;
+int bothCount = 0;
+int vibCount = 0;
 
 /* Time variables in ms */
 const unsigned long READ_TIMING = 1000;
-const unsigned long BOTH_EVENT_WINDOW = 600000;
-const unsigned long VIB_EVENT_WINDOW = 15000;
+const unsigned long BOTH_WINDOW = 600000;
+const unsigned long VIB_WINDOW = 15000;
 const unsigned long OUTPUT_CD = 3000; // 3600000, lowered for debugging
 unsigned long previousReadTime = 0;
-unsigned long previousBothEventTime = 0;
-unsigned long previousVibEventTime = 0;
+unsigned long previousBothTime = 0;
+unsigned long previousVibTime = 0;
 
 void setup() {
   pinMode(PIR, INPUT);
@@ -40,13 +40,13 @@ void loop() {
   unsigned long currentTime = millis();
 
   /* Check if within window */
-  if ( currentTime - previousBothEventTime >= BOTH_EVENT_WINDOW ) {
+  if ( currentTime - previousBothTime >= BOTH_WINDOW ) {
     bothActivityCount = 0;
-    previousBothEventTime = currentTime;
+    previousBothTime = currentTime;
   }
-  if ( currentTime - previousVibEventTime >= VIB_EVENT_WINDOW ) {
+  if ( currentTime - previousVibTime >= VIB_WINDOW ) {
     vibActivityCount = 0;
-    previousVibEventTime = currentTime;
+    previousVibTime = currentTime;
   }
   
   /* Check for timing */
@@ -59,23 +59,23 @@ void loop() {
 
     /* Output condition 1 */
     if ( pirState == 1 && vibState == 1 ) {
-      bothActivityCount++;
+      bothCount++;
       Serial.println("Count: Motion + vibration detected");
-      previousBothEventTime = currentTime;
+      previousBothTime = currentTime;
 
-      if ( bothActivityCount == 3 ) {
+      if ( bothCount == 3 ) {
         Serial.println("Output: Frequent motion + vibration detected");
         output();
       }
     }
 
-    /* Output condition 2 */
-    if ( pirState != 1 && vibState == 1 ) {
-      vibActivityCount++;
+    /* Output Condition 2 */
+    if ( vibState == 1 ) {
+      vibCount++;
       Serial.println("Count: Vibration detected");
-      previousVibEventTime = currentTime;
+      previousVibTime = currentTime;
 
-      if ( vibActivityCount == 7 ) {
+      if ( vibCount == 7 ) {
         Serial.println("Output: Sustained vibration detected");
         output();
       }
