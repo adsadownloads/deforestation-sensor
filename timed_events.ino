@@ -37,9 +37,9 @@ void output() {
 }
 
 void loop() {
-  unsigned long currentTime = millis(); // Current time
+  unsigned long currentTime = millis();
 
-  /* Check idleness */
+  /* Check if within window */
   if ( currentTime - previousBothEventTime >= BOTH_EVENT_WINDOW ) {
     bothActivityCount = 0;
     previousBothEventTime = currentTime;
@@ -49,12 +49,15 @@ void loop() {
     previousVibEventTime = currentTime;
   }
   
-  /* Check if within window */
-  if ( currentTime - previousEventTime < EVENT_WINDOW && currentTime - previousReadTime >= READ_TIMING ) {
+  /* Check for timing */
+  if ( currentTime - previousReadTime >= READ_TIMING ) {
     pirState = digitalRead(PIR);
+    while ( millis() - current time <= 700 ) {
+    }
     vibState = digitalRead(VIB);
     previousReadTime = currentTime;
 
+    /* Output condition 1 */
     if ( pirState == 1 && vibState == 1 ) {
       bothActivityCount++;
       Serial.println("Count: Motion + vibration detected");
@@ -66,6 +69,7 @@ void loop() {
       }
     }
 
+    /* Output condition 2 */
     if ( pirState != 1 && vibState == 1 ) {
       vibActivityCount++;
       Serial.println("Count: Vibration detected");
