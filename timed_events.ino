@@ -15,7 +15,7 @@ const unsigned long BOTH_EVENT_WINDOW = 600000;
 const unsigned long VIB_EVENT_WINDOW = 30000;
 const unsigned long OUTPUT_CD = 5000; // 3600000, lowered for debugging
 unsigned long previousBothEventTime = 0;
-unsigned long previousVibEventTime
+unsigned long previousVibEventTime = 0;
 unsigned long previousReadTime = 0;
 
 void setup() {
